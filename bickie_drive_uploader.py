@@ -44,6 +44,7 @@ def oauth2callback():
         "client_secret": credentials.client_secret,
         "scopes": credentials.scopes,
     }
+    print("Credentials saved in session:", session.get("credentials"))  # Debugging output
     return "✅ Google Drive is now connected. You can return to Bickie and upload your file."
 from googleapiclient.http import MediaFileUpload
 
