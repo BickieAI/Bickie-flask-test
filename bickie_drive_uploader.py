@@ -8,7 +8,7 @@ from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
-app.secret_key = "REPLACE_THIS_WITH_YOUR_SECRET_KEY"
+app.secret_key = "J4kH7aL9f8D2g5Z5sV3T5aP1mZ0nL7v9Xy5e9Zz3K1F3iR4"
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
