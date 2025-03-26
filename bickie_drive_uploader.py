@@ -1,4 +1,4 @@
- from flask import Flask, redirect, request, session, jsonify
+from flask import Flask, redirect, request, session, jsonify
 import os
 import logging
 from google_auth_oauthlib.flow import Flow
@@ -71,10 +71,18 @@ def upload_file():
     app.logger.debug("FILES: %s", request.files)  # Log the received files
     app.logger.debug("FORM DATA: %s", request.form)  # Log any other form data sent
 
-    uploaded_file = request.files.get("file")
-    if not uploaded_file:
+    # Check if 'file' is present in the incoming request
+    if 'file' not in request.files:
+        app.logger.error("No file part in the request")
         return "🚫 No file provided", 400  # If no file is provided, return error
+    
+    uploaded_file = request.files['file']
 
+    # If no file is selected by the user
+    if uploaded_file.filename == '':
+        app.logger.error("No selected file")
+        return "🚫 No selected file", 400
+    
     filename = uploaded_file.filename
     temp_path = os.path.join("/tmp", filename)
     uploaded_file.save(temp_path)
@@ -99,6 +107,7 @@ def upload_file():
         "message": "✅ File uploaded!",
         "link": uploaded.get("webViewLink")
     })
+
 
 
 @app.route("/")
