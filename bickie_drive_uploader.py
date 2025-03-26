@@ -49,9 +49,14 @@ from googleapiclient.http import MediaFileUpload
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
+    # Log everything coming in the request for debugging purposes
+    print("Request Headers:", request.headers)
+    print("FILES:", request.files)  # Log the received files
+    print("FORM DATA:", request.form)  # Log any other form data sent
+
     uploaded_file = request.files.get("file")
     if not uploaded_file:
-        return "🚫 No file provided", 400
+        return "🚫 No file provided", 400  # If no file is provided, return error
 
     filename = uploaded_file.filename
     temp_path = os.path.join("/tmp", filename)
