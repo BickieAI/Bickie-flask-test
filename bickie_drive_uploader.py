@@ -44,7 +44,38 @@ def oauth2callback():
         "client_secret": credentials.client_secret,
         "scopes": credentials.scopes,
     }
+from googleapiclient.http import MediaFileUpload
 
+@app.route("/upload", methods=["POST"])
+def upload_file():
+    uploaded_file = request.files.get("file")
+    if not uploaded_file:
+        return "🚫 No file provided", 400
+
+    filename = uploaded_file.filename
+    temp_path = os.path.join("/tmp", filename)
+    uploaded_file.save(temp_path)
+
+    creds_dict = session.get("credentials")
+    if not creds_dict:
+        return "🚫 Not authenticated with Google", 403
+
+    credentials = Credentials(**creds_dict)
+    drive_service = build("drive", "v3", credentials=credentials)
+
+    file_metadata = {"name": filename}
+    media = MediaFileUpload(temp_path, resumable=True)
+
+    uploaded = drive_service.files().create(
+        body=file_metadata,
+        media_body=media,
+        fields="id, webViewLink"
+    ).execute()
+
+    return jsonify({
+        "message": "✅ File uploaded!",
+        "link": uploaded.get("webViewLink")
+    })
     return "✅ Google Drive is now connected."
 
 @app.route("/")
