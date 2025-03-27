@@ -68,24 +68,27 @@ def oauth2callback():
 def upload_file():
     # Debugging output to log request data
     app.logger.debug("Request Headers: %s", request.headers)
-    app.logger.debug("FILES: %s", request.files)  # Log the received files
-    app.logger.debug("FORM DATA: %s", request.form)  # Log any other form data sent
+    app.logger.debug("BODY: %s", request.json)  # Log the received JSON
 
-    # Check if 'file' is present in the incoming request
-    if 'file' not in request.files:
-        app.logger.error("No file part in the request")
-        return "🚫 No file provided", 400  # If no file is provided, return error
-    
-    uploaded_file = request.files['file']
+    # Ensure that the file_url is included in the request JSON body
+    file_url = request.json.get("file_url")
+    if not file_url:
+        return "🚫 No file URL provided", 400  # If no file URL is provided, return error
 
-    # If no file is selected by the user
-    if uploaded_file.filename == '':
-        app.logger.error("No selected file")
-        return "🚫 No selected file", 400
-    
-    filename = uploaded_file.filename
+    # Fetch the file from the URL
+    try:
+        file_response = requests.get(file_url)
+        file_response.raise_for_status()  # Check if the request was successful
+        file_content = file_response.content
+        filename = file_url.split("/")[-1]  # Extract filename from the URL
+    except requests.exceptions.RequestException as e:
+        app.logger.error("Error fetching file from URL: %s", e)
+        return "🚫 Error fetching file from URL", 400
+
+    # Save the file temporarily before uploading to Google Drive
     temp_path = os.path.join("/tmp", filename)
-    uploaded_file.save(temp_path)
+    with open(temp_path, "wb") as temp_file:
+        temp_file.write(file_content)
 
     creds_dict = session.get("credentials")
     if not creds_dict:
