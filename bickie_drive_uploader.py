@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, redirect, request, session, jsonify
 import os
 import logging
